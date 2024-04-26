@@ -6,6 +6,7 @@ import './App.css';
 interface IState {
   data: ServerRespond[],
   showGraph: boolean,
+  intervalId: NodeJS.Timeout | null // Define type for interval
 }
 
 class App extends Component<{}, IState> {
@@ -14,6 +15,7 @@ class App extends Component<{}, IState> {
     this.state = {
       data: [],
       showGraph: false,
+      intervalId: null // Initialize intervalId to null
     };
   }
 
@@ -35,8 +37,25 @@ class App extends Component<{}, IState> {
       x++;
       if (x > 1000) {
         clearInterval(interval);
+        this.setState({ intervalId: null }); // Set intervalId to null when clearInterval is called
       }
     }, 100);
+    this.setState({ intervalId: interval }); // Store intervalId in the state
+  }
+
+  stopStreamingData() {
+    if (this.state.intervalId) {
+      clearInterval(this.state.intervalId);
+      this.setState({ intervalId: null }); // Set intervalId to null when clearInterval is called
+    }
+  }
+
+    clearData() {
+    this.setState({
+      data: [],
+      showGraph: false,
+      intervalId: null // Also clear intervalId
+    });
   }
 
   render() {
@@ -46,7 +65,18 @@ class App extends Component<{}, IState> {
           Bank Merge & Co Task 3
         </header>
         <div className="App-content">
-          <button className="btn btn-primary Stream-button" onClick={() => {this.getDataFromServer()}}>Start Streaming Data</button>
+          <button className="btn btn-primary Stream-button" onClick={() => {
+            this.getDataFromServer()
+          }}>Start Streaming Data
+          </button>
+          <button className="btn btn-danger Stop" onClick={() => {
+            this.stopStreamingData();
+          }}>Stop
+          </button>
+          <button className="btn btn-warning Clear" onClick={() => {
+            this.clearData();
+          }}>Clear
+          </button>
           <div className="Graph">
             {this.renderGraph()}
           </div>
